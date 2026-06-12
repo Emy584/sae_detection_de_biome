@@ -25,53 +25,22 @@ public class FlouGaussien implements FlouInterface {
                 return;
             }
 
-
             // Création du filtre Gaussien
             double[][] filtre = this.calculFiltreGauss(this.TAILLE_FILTRE, this.SIGMA);
 
-            // création d'une nv image vide avec les mêmes dimensions
+            // Création d'une nv image vide avec les mêmes dimensions
             int largeur = imageSource.getWidth();
             int longeur = imageSource.getHeight();
 
             BufferedImage nvImage = new BufferedImage(largeur, longeur, BufferedImage.TYPE_3BYTE_BGR);
 
-            // On calcul le rayon (util apres)
-            int rayon = (TAILLE_FILTRE - 1) / 2;
-
             // On parcours chaque piexel de l'image
             for (int x = 0; x < largeur; x++) {
                 for (int y = 0; y < longeur; y++) {
 
-                    // Tableau de la nouvelle couleur (avec les valeurs RGB des voisins accumulé)
-                    int[] newTabCol = {0, 0, 0};
+                    Color newCol = convolution(x, y, largeur, longeur, filtre, imageSource);
 
-                    // On parcours tout les pixels autour du point
-                    for (int i = -rayon; i <= rayon; i++) {
-                        for (int j = -rayon; j <= rayon; j++) {
-
-                            // On recupère les coordonées X Y du pixel que l'on va accumulé
-                            int voisinX = x + i;
-                            int voisinY = y + j;
-
-                            //Verification si le pixel n'est pas en dehors de l'image
-                            // + Verification si le filtre multiplie par 0 on coupe direct
-                            if (voisinX >= 0 && voisinX < largeur && voisinY >= 0 && voisinY < longeur && filtre[i + rayon][j + rayon] != 0) {
-
-                                //On récupère la couleur du pixel à accumulé
-                                int couleur = imageSource.getRGB(voisinX, voisinY);
-                                int[] tabCol = OutilCouleur.getTabColor(couleur);
-
-                                // On parcours les 3 couleurs
-                                for (int k = 0; k < 3; k++) {
-                                    newTabCol[k] += (int) (tabCol[k] * filtre[i + rayon][j + rayon]);
-                                }
-
-                                Color newCol = new Color(newTabCol[0], newTabCol[1], newTabCol[2]);
-
-                                nvImage.setRGB(voisinX, voisinY, newCol.getRGB());
-                            }
-                        }
-                    }
+                    nvImage.setRGB(x, y, newCol.getRGB());
                 }
             }
 
@@ -107,7 +76,6 @@ public class FlouGaussien implements FlouInterface {
         double[][] filtre = new double[largeurFiltre][largeurFiltre];
         double somme = 0;
 
-
         int rayon = (largeurFiltre - 1) / 2;
 
         for (int i = 0; i < largeurFiltre; i++) {
@@ -127,5 +95,39 @@ public class FlouGaussien implements FlouInterface {
             }
         }
         return filtre;
+    }
+
+    // Fonction qui caclcul la convolution de la couleur
+    private Color convolution(int x, int y, int largeur, int longeur, double[][] filtre, BufferedImage imageSource) {
+        // On calcul le rayon (util apres)
+        int rayon = (TAILLE_FILTRE - 1) / 2;
+
+        // Tableau de la nouvelle couleur (avec les valeurs RGB des voisins accumulé)
+        int[] newTabCol = {0, 0, 0};
+
+        // On parcours tout les pixels autour du point
+        for (int i = -rayon; i <= rayon; i++) {
+            for (int j = -rayon; j <= rayon; j++) {
+
+                // On recupère les coordonées X Y du pixel que l'on va accumulé
+                int voisinX = x + i;
+                int voisinY = y + j;
+
+                //Verification si le pixel n'est pas en dehors de l'image
+                // + Verification si le filtre multiplie par 0 on coupe direct
+                if (voisinX >= 0 && voisinX < largeur && voisinY >= 0 && voisinY < longeur && filtre[i + rayon][j + rayon] != 0) {
+
+                    //On récupère la couleur du pixel à accumulé
+                    int couleur = imageSource.getRGB(voisinX, voisinY);
+                    int[] tabCol = OutilCouleur.getTabColor(couleur);
+
+                    // On parcours les 3 couleurs
+                    for (int k = 0; k < 3; k++) {
+                        newTabCol[k] += (int) (tabCol[k] * filtre[i + rayon][j + rayon]);
+                    }
+                }
+            }
+        }
+        return new Color(newTabCol[0], newTabCol[1], newTabCol[2]);
     }
 }
