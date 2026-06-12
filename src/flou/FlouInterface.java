@@ -2,6 +2,6 @@ package flou;
 
 public interface FlouInterface {
 
-    void setFlou(String cheminSource, String cheminDestination);
+    void setFlou(String cheminSource, String cheminDestination, int index);
 
 }
