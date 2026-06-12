@@ -1,4 +1,4 @@
-//License from project: Apache License 
+package Normes;//License from project: Apache License
 
 /**
  * Classe donnée

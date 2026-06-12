@@ -1,3 +1,4 @@
+package Normes;
 import java.awt.Color;
 
 public class NormeCIELAB implements NormeCouleurs {
@@ -11,13 +12,13 @@ public class NormeCIELAB implements NormeCouleurs {
     @Override
     public double distanceCouleurs(Color c1, Color c2) {
         // conversion première couleur en coordonnées L*a*b*
-        int[] lab1 = Main.rgb2lab(c1.getRed(), c1.getGreen(), c1.getBlue()); 
+        int[] lab1 = MainCIE94.rgb2lab(c1.getRed(), c1.getGreen(), c1.getBlue());
         double l1 = lab1[0];
         double a1 = lab1[1];
         double b1 = lab1[2];
 
         // deuxième couleur 
-        int[] lab2 = Main.rgb2lab(c2.getRed(), c2.getGreen(), c2.getBlue());
+        int[] lab2 = MainCIE94.rgb2lab(c2.getRed(), c2.getGreen(), c2.getBlue());
         double l2 = lab2[0];
         double a2 = lab2[1];
         double b2 = lab2[2];

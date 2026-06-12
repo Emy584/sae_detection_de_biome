@@ -1,3 +1,4 @@
+package Normes;
 import java.awt.Color;
 
 public class NormeCIE94 implements NormeCouleurs {

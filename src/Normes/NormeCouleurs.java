@@ -1,3 +1,4 @@
+package Normes;
 import java.awt.Color;
 
 public interface NormeCouleurs {
