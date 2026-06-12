@@ -2,7 +2,7 @@
 .idea
 sae_detection_de_biome.iml
 out/
-.class
+src/flou/*.class
 !**/src/main/**/out/
 !**/src/test/**/out/
 
