@@ -1,0 +1,42 @@
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+
+public class CopiePixelParPixel {
+
+  public static void copierPixelParPixel(String cheminSource, String cheminDestination) {
+    try {
+      // on charge l'image
+      File fichierSource = new File(cheminSource);
+      BufferedImage imageSource = ImageIO.read(fichierSource);
+
+      if (imageSource == null) {
+        System.out.println("Erreur : impossible de lire l'image");
+        return;
+      }
+
+      // création d'une nv image vide avec les mêmes dimensions 
+      int largeur = imageSource.getWidth();
+      int longeur = imageSource.getHeight();
+      BufferedImage nvImage = new BufferedImage(largeur, longeur, BufferedImage.TYPE_3BYTE_BGR);
+
+      for (int x = 0; x < largeur; x++) {
+        for (int y = 0; y < longeur; y++) {
+          int couleur = imageSource.getRGB(x, y);
+          nvImage.setRGB(x, y, couleur);
+        }
+      }
+
+      // sauvegarde le résultat
+      File fichierDest = new File(cheminDestination);
+      ImageIO.write(nvImage, "png", fichierDest);
+      System.out.println("Copie pixel par piwel terminée");
+
+    } catch (IOException e) {
+      System.err.println("Erreur lors de la copie : " + e.getMessage());
+    }
+
+  }
+  
+}
