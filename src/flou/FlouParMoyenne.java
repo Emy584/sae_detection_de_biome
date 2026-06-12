@@ -1,9 +1,11 @@
+package flou;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
-public class CopiePixelParPixel {
+public class FlouParMoyenne {
 
   public static void copierPixelParPixel(String cheminSource, String cheminDestination) {
     try {
