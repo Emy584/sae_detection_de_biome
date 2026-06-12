@@ -3,7 +3,7 @@
 /**
  * Classe donnée
  */
-public class Main {
+public class MainCIE94 {
     public static int[] rgb2lab(int R, int G, int B) {
         // http://www.brucelindbloom.com
 

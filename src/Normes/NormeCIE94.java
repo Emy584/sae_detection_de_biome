@@ -10,13 +10,13 @@ public class NormeCIE94 implements NormeCouleurs {
    */
     @Override
     public double distanceCouleurs(Color c1, Color c2) {
-        // conversion des deux couleurs en coordonnées L*a*b* (via la classe Main donné sur Arche)
-        int[] lab1 = Main.rgb2lab(c1.getRed(), c1.getGreen(), c1.getBlue());
+        // conversion des deux couleurs en coordonnées L*a*b* (via la classe MainCIE94 donné sur Arche)
+        int[] lab1 = MainCIE94.rgb2lab(c1.getRed(), c1.getGreen(), c1.getBlue());
         double l1 = lab1[0];
         double a1 = lab1[1];
         double b1 = lab1[2];
 
-        int[] lab2 = Main.rgb2lab(c2.getRed(), c2.getGreen(), c2.getBlue());
+        int[] lab2 = MainCIE94.rgb2lab(c2.getRed(), c2.getGreen(), c2.getBlue());
         double l2 = lab2[0];
         double a2 = lab2[1];
         double b2 = lab2[2];
