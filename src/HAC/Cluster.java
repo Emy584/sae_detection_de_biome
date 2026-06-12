@@ -50,7 +50,7 @@ public class Cluster {
     // calcul du voisin le plus proche
     public double singleLinkage(Cluster autre, double[][] distances){
         // on prends une distance grande
-        double min = 10000;
+        double min = Double.MAX_VALUE;
         // pour chaque enfant de notre groupe
         for (int i=0; i<this.points.size(); i++){
             //numero du groupe
@@ -58,7 +58,7 @@ public class Cluster {
             // et chaque enfant de l'autre groupe
             for(int j=0; j<autre.getPoints().size(); j++) {
                 // numero du groupe
-                int groupeD = this.points.get(j);
+                int groupeD = autre.getPoints().get(j);
                 // distance entre les deux groupes
                 double ecart = distances[groupeG][groupeD];
                 // on prends l'ecart le plus petit
@@ -82,7 +82,7 @@ public class Cluster {
             // et chaque enfant de l'autre groupe
             for(int j=0; j<autre.getPoints().size(); j++) {
                 // numero du groupe
-                int groupeD = this.points.get(j);
+                int groupeD = autre.getPoints().get(j);
                 // distance entre les deux groupes
                 double ecart = distances[groupeG][groupeD];
                 // on prends l'ecart le plus petit
@@ -103,7 +103,7 @@ public class Cluster {
         for (int i=0; i<this.points.size(); i++){
             int groupeG = this.points.get(i);
             for(int j=0; j<autre.getPoints().size(); j++) {
-                int groupeD = this.points.get(j);
+                int groupeD = autre.getPoints().get(j);
                 // on calcule les distances
                 double ecart = distances[groupeG][groupeD];
                 somme=somme+ecart;
@@ -135,9 +135,9 @@ public class Cluster {
 
         double sommexD = 0;
         double sommeyD = 0;
-        for (int j=0; j<this.points.size(); j++){
+        for (int j=0; j<autre.getPoints().size(); j++){
             // recuperer id du point
-            int idPointD = this.points.get(j);
+            int idPointD = autre.getPoints().get(j);
             // on calcule la moyenne sur l'axe x
             sommexD += coordonnees[idPointD][0]; // Accumulation des X
 
@@ -160,4 +160,8 @@ public class Cluster {
     public List<Integer> getPoints() {
         return points;
     }
+    public Cluster getC1() { return c1; }
+    public Cluster getC2() { return c2; }
+    public double getDistance() { return distance; }
+    public int getNumGroupe() { return numGroupe; }
 }
