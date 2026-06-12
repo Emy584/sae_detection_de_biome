@@ -1,13 +1,12 @@
 package Algo_Kmeans;
 
 import flou.OutilCouleur;
-
+import outils.AlgoInterface;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import static flou.OutilCouleur.getTabColor;
 
 /**
  * Réflexion
