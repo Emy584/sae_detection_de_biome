@@ -1,4 +1,4 @@
-public interface AlgoIInterface {
+public interface AlgoInterface {
 
     int[] algorithmeClustering(int[][] tableauD);
 }
