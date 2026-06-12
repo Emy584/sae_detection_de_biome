@@ -19,4 +19,8 @@ public class OutilCouleur {
     return color.getRGB();
   }
   
+  public static int combineCouleur(int r, int g, int b) {
+    Color color = new Color(r, g, b);
+    return color.getRGB();
+  }
 }
