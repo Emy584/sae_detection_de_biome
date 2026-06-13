@@ -9,11 +9,11 @@ import java.io.IOException;
 public class FlouGaussien implements FlouInterface {
 
     // Constante /!\ Taille filtre doit être impaire
-    private final int TAILLE_FILTRE = 25;
-    private final double SIGMA = 4;
+    private int taille_filtre = 25;
+    private double sigma = 4;
 
     @Override
-    public void setFlou(String cheminSource, String cheminDestination, int index) {
+    public void setFlou(String cheminSource, String cheminDestination, int tailleFiltre) {
         try {
             // On charge l'image
             File fichierSource = new File(cheminSource);
@@ -26,13 +26,19 @@ public class FlouGaussien implements FlouInterface {
             }
 
             // Création du filtre Gaussien
-            double[][] filtre = this.calculFiltreGauss(this.TAILLE_FILTRE, this.SIGMA);
+            double[][] filtre = this.calculFiltreGauss(this.taille_filtre, this.sigma);
 
             // Création d'une nv image vide avec les mêmes dimensions
             int largeur = imageSource.getWidth();
             int longeur = imageSource.getHeight();
 
             BufferedImage nvImage = new BufferedImage(largeur, longeur, BufferedImage.TYPE_3BYTE_BGR);
+
+            // Si la taille du filtre est valide on la change, sinon on utlisaera les valeures par defaut
+            if(tailleFiltre > 0){
+                this.taille_filtre = tailleFiltre;
+                this.sigma = tailleFiltre / 6.0;
+            }
 
             // On parcours chaque piexel de l'image
             for (int x = 0; x < largeur; x++) {
@@ -98,7 +104,7 @@ public class FlouGaussien implements FlouInterface {
     // Fonction qui caclcul la convolution de la couleur
     private Color convolution(int x, int y, int largeur, int longeur, double[][] filtre, BufferedImage imageSource) {
         // On calcul le rayon (util apres)
-        int rayon = (TAILLE_FILTRE - 1) / 2;
+        int rayon = (taille_filtre - 1) / 2;
 
         // Tableau de la nouvelle couleur (avec les valeurs RGB des voisins accumulé)
         double[] newTabCol = {0, 0, 0};
