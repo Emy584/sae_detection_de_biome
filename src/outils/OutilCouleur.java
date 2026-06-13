@@ -1,4 +1,4 @@
-package flou;
+package outils;
 
 import java.awt.Color;
 

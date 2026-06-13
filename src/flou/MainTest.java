@@ -1,6 +1,6 @@
 package flou;
 
-public class mainTestFlou {
+public class MainTest {
     public static void main(String[] args) {
         FlouParMoyenne fm =  new FlouParMoyenne();
         FlouGaussien fg = new FlouGaussien();

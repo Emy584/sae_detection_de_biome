@@ -1,6 +1,6 @@
 package Algo_Kmeans;
 
-import flou.OutilCouleur;
+import outils.OutilCouleur;
 import outils.AlgoInterface;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
