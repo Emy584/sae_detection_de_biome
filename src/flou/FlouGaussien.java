@@ -25,6 +25,8 @@ public class FlouGaussien implements FlouInterface {
                 return;
             }
 
+            System.out.println("Image chargée " + fichierSource.getName());
+
             // Création du filtre Gaussien
             double[][] filtre = this.calculFiltreGauss(this.taille_filtre, this.sigma);
 
@@ -32,31 +34,36 @@ public class FlouGaussien implements FlouInterface {
             int largeur = imageSource.getWidth();
             int longeur = imageSource.getHeight();
 
-            BufferedImage nvImage = new BufferedImage(largeur, longeur, BufferedImage.TYPE_3BYTE_BGR);
+            BufferedImage nouvelleImage = new BufferedImage(largeur, longeur, BufferedImage.TYPE_3BYTE_BGR);
 
             // Si la taille du filtre est valide on la change, sinon on utlisaera les valeures par defaut
             if(tailleFiltre > 0){
                 this.taille_filtre = tailleFiltre;
                 this.sigma = tailleFiltre / 6.0;
+            } else {
+                System.out.println("Taille de filtre incorect, application des valeurs de base");
             }
 
+            System.out.println("Filtre créé : TAILLE = " + this.taille_filtre + " / SIGMA = " + this.sigma);
+
+            System.out.println("Création de la nouvelle image ...");
             // On parcours chaque piexel de l'image
             for (int x = 0; x < largeur; x++) {
                 for (int y = 0; y < longeur; y++) {
 
                     Color newCol = convolution(x, y, largeur, longeur, filtre, imageSource);
 
-                    nvImage.setRGB(x, y, newCol.getRGB());
+                    nouvelleImage.setRGB(x, y, newCol.getRGB());
                 }
             }
 
             // Sauvegarde du résultat
             File fichierDest = new File(cheminDestination);
-            ImageIO.write(nvImage, "png", fichierDest);
-            System.out.println("Copie pixel par pixel terminée");
+            ImageIO.write(nouvelleImage, "png", fichierDest);
+            System.out.println("Floutage de l'image réussi");
 
         } catch (IOException e) {
-            System.err.println("Erreur lors de la copie : " + e.getMessage());
+            System.err.println("Erreur lors du floutage : " + e.getMessage());
         }
     }
 
