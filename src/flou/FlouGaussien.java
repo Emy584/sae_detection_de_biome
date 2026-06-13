@@ -25,7 +25,7 @@ public class FlouGaussien implements FlouInterface {
                 return;
             }
 
-            System.out.println("Image chargée " + fichierSource.getName());
+            System.out.println("Image chargée : " + fichierSource.getName());
 
             // Création du filtre Gaussien
             double[][] filtre = this.calculFiltreGauss(this.taille_filtre, this.sigma);
@@ -37,11 +37,11 @@ public class FlouGaussien implements FlouInterface {
             BufferedImage nouvelleImage = new BufferedImage(largeur, longeur, BufferedImage.TYPE_3BYTE_BGR);
 
             // Si la taille du filtre est valide on la change, sinon on utlisaera les valeures par defaut
-            if(tailleFiltre > 0){
+            if (tailleFiltre > 0) {
                 this.taille_filtre = tailleFiltre;
                 this.sigma = tailleFiltre / 6.0;
             } else {
-                System.out.println("Taille de filtre incorect, application des valeurs de base");
+                System.out.println("Taille de filtre incorect, application des valeurs par défaut");
             }
 
             System.out.println("Filtre créé : TAILLE = " + this.taille_filtre + " / SIGMA = " + this.sigma);
@@ -60,7 +60,7 @@ public class FlouGaussien implements FlouInterface {
             // Sauvegarde du résultat
             File fichierDest = new File(cheminDestination);
             ImageIO.write(nouvelleImage, "png", fichierDest);
-            System.out.println("Floutage de l'image réussi");
+            System.out.println("Floutage de l'image réussi : " + fichierDest.getName());
 
         } catch (IOException e) {
             System.err.println("Erreur lors du floutage : " + e.getMessage());
@@ -93,9 +93,9 @@ public class FlouGaussien implements FlouInterface {
 
         for (int i = -rayon; i <= rayon; i++) {
             for (int j = -rayon; j <= rayon; j++) {
-                filtre[i+rayon][j+rayon] = formuleDeGauss(i, j , sigma);
+                filtre[i + rayon][j + rayon] = formuleDeGauss(i, j, sigma);
 
-                somme += filtre[i+rayon][j+rayon];
+                somme += filtre[i + rayon][j + rayon];
             }
         }
 
@@ -141,6 +141,6 @@ public class FlouGaussien implements FlouInterface {
         }
 
         // On retour la nouvelle couleur en castant en int pour convenir au constructeur
-        return new Color((int) newTabCol[0],(int) newTabCol[1],(int) newTabCol[2]);
+        return new Color((int) newTabCol[0], (int) newTabCol[1], (int) newTabCol[2]);
     }
 }
