@@ -27,10 +27,7 @@ public class FlouGaussien implements FlouInterface {
 
             System.out.println("Image chargée : " + fichierSource.getName());
 
-            // Création du filtre Gaussien
-            double[][] filtre = this.calculFiltreGauss(this.taille_filtre, this.sigma);
-
-            // Création d'une nv image vide avec les mêmes dimensions
+            // Création d'une nouvelle image vide avec les mêmes dimensions
             int largeur = imageSource.getWidth();
             int longeur = imageSource.getHeight();
 
@@ -43,6 +40,9 @@ public class FlouGaussien implements FlouInterface {
             } else {
                 System.out.println("Taille de filtre incorect, application des valeurs par défaut");
             }
+
+            // Création du filtre Gaussien
+            double[][] filtre = this.calculFiltreGauss(this.taille_filtre, this.sigma);
 
             System.out.println("Filtre créé : TAILLE = " + this.taille_filtre + " / SIGMA = " + this.sigma);
 
