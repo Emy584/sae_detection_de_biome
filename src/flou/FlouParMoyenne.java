@@ -67,7 +67,7 @@ public class FlouParMoyenne implements FlouInterface {
           int moyBleu  = sommeBleu / diviseur;
 
           // calcul de la nouvelle couleur floutée du pixel
-          int nouvelleCouleur = OutilCouleur.combineCouleur(moyRouge, moyVert, moyBleu);
+          int nouvelleCouleur = OutilCouleur.getColor(moyRouge, moyVert, moyBleu);
 
           // on applique le pixel flou sur la nouvelle image
           nvImage.setRGB(x, y, nouvelleCouleur);
