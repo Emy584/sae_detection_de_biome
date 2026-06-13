@@ -1,6 +1,6 @@
 package flou;
 
-public class main {
+public class mainTestFlou {
     public static void main(String[] args) {
         FlouGaussien fg = new FlouGaussien();
 
