@@ -9,8 +9,8 @@ import java.io.IOException;
 public class FlouGaussien implements FlouInterface {
 
     // Constante /!\ Taille filtre doit être impaire
-    final int TAILLE_FILTRE = 7;
-    final double SIGMA = 1;
+    private final int TAILLE_FILTRE = 25;
+    private final double SIGMA = 4;
 
     @Override
     public void setFlou(String cheminSource, String cheminDestination) {
@@ -55,7 +55,7 @@ public class FlouGaussien implements FlouInterface {
     }
 
     // Fonction pour appliqué la formule de Gauss
-    public double formuleDeGauss(double x, double y, double sigma) {
+    private double formuleDeGauss(double x, double y, double sigma) {
 
         //Calcul 1er facteur de la multiplication
         double res = 2 * Math.PI * Math.pow(sigma, 2);
@@ -71,27 +71,25 @@ public class FlouGaussien implements FlouInterface {
     }
 
     // Fonction qui calcul le filtre Gaussien à partir de la taille et du sigma
-    public double[][] calculFiltreGauss(int largeurFiltre, double sigma) {
+    private double[][] calculFiltreGauss(int largeurFiltre, double sigma) {
 
         double[][] filtre = new double[largeurFiltre][largeurFiltre];
         double somme = 0;
 
         int rayon = (largeurFiltre - 1) / 2;
 
-        for (int i = 0; i < largeurFiltre; i++) {
-            for (int j = 0; j < largeurFiltre; j++) {
-                filtre[i][j] = formuleDeGauss(Math.abs(rayon - i), Math.abs(rayon - j), sigma);
+        for (int i = -rayon; i <= rayon; i++) {
+            for (int j = -rayon; j <= rayon; j++) {
+                filtre[i+rayon][j+rayon] = formuleDeGauss(i, j , sigma);
 
-                somme += filtre[i][j];
+                somme += filtre[i+rayon][j+rayon];
             }
         }
 
         // Normalisation pour que la somme fasse 1
         for (int i = 0; i < largeurFiltre; i++) {
             for (int j = 0; j < largeurFiltre; j++) {
-
                 filtre[i][j] = filtre[i][j] / somme;
-
             }
         }
         return filtre;
@@ -103,7 +101,7 @@ public class FlouGaussien implements FlouInterface {
         int rayon = (TAILLE_FILTRE - 1) / 2;
 
         // Tableau de la nouvelle couleur (avec les valeurs RGB des voisins accumulé)
-        int[] newTabCol = {0, 0, 0};
+        double[] newTabCol = {0, 0, 0};
 
         // On parcours tout les pixels autour du point
         for (int i = -rayon; i <= rayon; i++) {
@@ -123,11 +121,13 @@ public class FlouGaussien implements FlouInterface {
 
                     // On parcours les 3 couleurs
                     for (int k = 0; k < 3; k++) {
-                        newTabCol[k] += (int) (tabCol[k] * filtre[i + rayon][j + rayon]);
+                        newTabCol[k] += tabCol[k] * filtre[i + rayon][j + rayon];
                     }
                 }
             }
         }
-        return new Color(newTabCol[0], newTabCol[1], newTabCol[2]);
+
+        // On retour la nouvelle couleur en castant en int pour convenir au constructeur
+        return new Color((int) newTabCol[0],(int) newTabCol[1],(int) newTabCol[2]);
     }
 }
