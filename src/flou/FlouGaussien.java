@@ -13,7 +13,7 @@ public class FlouGaussien implements FlouInterface {
     private final double SIGMA = 4;
 
     @Override
-    public void setFlou(String cheminSource, String cheminDestination) {
+    public void setFlou(String cheminSource, String cheminDestination, int index) {
         try {
             // On charge l'image
             File fichierSource = new File(cheminSource);
