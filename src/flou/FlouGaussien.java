@@ -36,7 +36,7 @@ public class FlouGaussien implements FlouInterface {
             BufferedImage nouvelleImage = new BufferedImage(largeur, longeur, BufferedImage.TYPE_3BYTE_BGR);
 
             // Si la taille du filtre est valide on la change, sinon on utlisaera les valeures par defaut
-            if (tailleFiltre > 0) {
+            if (tailleFiltre > 0 && (tailleFiltre % 2 != 0)) {
                 this.taille_filtre = tailleFiltre;
                 this.sigma = tailleFiltre / 6.0;
             } else {
