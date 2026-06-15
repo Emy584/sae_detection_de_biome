@@ -11,13 +11,10 @@ public class Palette {
     
     // toutes les couleurs disponibles avec le nom du biome correspondant
     private HashMap<String, Color> listeCouleurs;
-    // toutes les couleurs disponibles
-    private static HashMap<String, Color> listeCouleurs;
     ArrayList<Color> couleurs ;
     public Palette(ArrayList<Color> couleurs) {
         this.couleurs = couleurs ;
     }
-
 
     // constructeur qui initialise les biomes avec leurs couleurs
     public Palette() {
@@ -64,6 +61,7 @@ public class Palette {
     public Color getCouleurBiome(String nomBiome) {
         return listeCouleurs.get(nomBiome);
     }
+
     public Color getPlusProche(Color c) {
         Color min = couleurs.get(0);
         for (int i = 1; i < couleurs.size(); i++) {

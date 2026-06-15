@@ -213,7 +213,7 @@ public class AlgoKMeans implements AlgoInterface {
                     int g = (int) centroidesFinaux[cluster][1];
                     int b = (int) centroidesFinaux[cluster][2];
 
-                    int newRgb = OutilCouleur.combineCouleur(r, g, b);
+                    int newRgb = OutilCouleur.getColor(r, g, b);
                     nvImage.setRGB(x, y, newRgb);
 
                     index++;
