@@ -1,5 +1,8 @@
 package Algo_DbScan;
 
+import Normes.NormeRedmean;
+import outils.OutilCouleur;
+
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -23,7 +26,7 @@ public class Palette {
         Color min = couleurs.getFirst();
         NormeRedmean norm = new NormeRedmean();
         for (int i = 1; i < couleurs.size(); i++) {
-            if(norm.distanceCouleur(c,couleurs.get(i))<norm.distanceCouleur(c,min)){
+            if(norm.distanceCouleurs(c,couleurs.get(i))<norm.distanceCouleurs(c,min)){
                 min = couleurs.get(i);
             }
         }

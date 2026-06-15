@@ -1,5 +1,7 @@
 package Algo_DbScan;
 
+import outils.OutilCouleur;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
