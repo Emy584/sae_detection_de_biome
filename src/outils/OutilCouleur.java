@@ -6,16 +6,21 @@ import java.awt.image.BufferedImage;
 
 public class OutilCouleur {
 
-    public static int[] getTabColor(int c) {  // c : entier rgb
-        int blue = c & 0xff;
-        int green = (c & 0xff00) >> 8;
-        int red = (c & 0xff0000) >> 16;
+  public static int[] getTabColor(int c) {  // c : entier rgb
+    int blue = c & 0xff;
+    int green = (c & 0xff00) >> 8;
+    int red = (c & 0xff0000) >> 16;
 
-        int[] rgb = {red, green, blue};
-        return rgb;
-    }
+    int[] rgb = {red, green, blue};
+    return rgb;
+  }
 
   public static int getColor(int r, int g, int b) {
+    Color color = new Color(r, g, b);
+    return color.getRGB();
+  }
+
+  public static int combineCouleur(int r, int g, int b) {
     Color color = new Color(r, g, b);
     return color.getRGB();
   }
@@ -52,16 +57,36 @@ public class OutilCouleur {
                 int r2 = (rgb2 >> 16) & 0xff;
                 int g2 = (rgb2 >> 8) & 0xff;
                 int b2 = rgb2 & 0xff;
+  /**
+   * méthode qui éclaircit un pixel selon un pourcentage donné
+   * nouveau = valeur + (pourcentage/100) * (255 - valeur)
+   */
+  public static int eclaircirPixel(int rgb, double pourcentage) {
+    // extraction des canaux
+    // alpha
+    int a = (rgb >> 24) & 0xFF;
+    int[] tab = getTabColor(rgb);
+    int r = tab[0];
+    int g = tab[1];
+    int b = tab[2];
 
                 double distance = Math.sqrt(
                         (r1 - r2) * (r1 - r2)
                                 + (g1 - g2) * (g1 - g2)
                                 + (b1 - b2) * (b1 - b2)
                 );
+    // calcul des nouvelles valeurs
+    int nouveauR = (int) Math.round(r + (pourcentage / 100.0) * (255 - r));
+    int nouveauG = (int) Math.round(g + (pourcentage / 100.0) * (255 - g));
+    int nouveauB = (int) Math.round(b + (pourcentage / 100.0) * (255 - b));
 
                 somme += distance;
             }
         }
+    // vérif de ne pas dépasser 255
+    nouveauR = Math.min(255, nouveauR);
+    nouveauG = Math.min(255, nouveauG);
+    nouveauB = Math.min(255, nouveauB);
 
         return somme / (originale.getWidth() * originale.getHeight());
     }
@@ -70,4 +95,7 @@ public class OutilCouleur {
         double erreur = erreurMoyenne(originale, resultat);
         return 100.0 * (1.0 - erreur / 441.67295593);
     }
+    // recombinaison des canaux
+    return (a << 24) | (nouveauR << 16) | (nouveauG << 8) | nouveauB;
+  }
 }

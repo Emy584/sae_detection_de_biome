@@ -5,9 +5,12 @@ import Normes.NormeRedmean;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import Normes.NormeCouleurs;
 
 public class Palette {
     
+    // toutes les couleurs disponibles avec le nom du biome correspondant
+    private HashMap<String, Color> listeCouleurs;
     // toutes les couleurs disponibles
     private static HashMap<String, Color> listeCouleurs;
     ArrayList<Color> couleurs ;
@@ -16,7 +19,7 @@ public class Palette {
     }
 
 
-
+    // constructeur qui initialise les biomes avec leurs couleurs
     public Palette() {
         this.listeCouleurs = new HashMap<>();
         listeCouleurs.put("Tundra", new Color(71, 70, 61));
@@ -31,6 +34,36 @@ public class Palette {
         listeCouleurs.put("Eau profonde", new Color(12, 31, 47));
     }
 
+    /**
+     * méthode pour trouver le biome dont la couleur est la plus proche de la couleur donnée
+     * en utilisant une norme spécifique
+     */
+    public String trouverBiomeLePlusProche(Color couleurCentroide, NormeCouleurs norme) {
+        // initialisation
+        String meilleurBiome = "Inconnu";
+        double distanceMin = Double.MAX_VALUE;
+
+        // on parcourt la palette des biomes
+        for (HashMap.Entry<String, Color> entry : listeCouleurs.entrySet()) {
+            String biome = entry.getKey();
+            Color c = entry.getValue();
+
+            // on calcule la distance entre la couleur du centroide et la couleur
+            double distance = norme.distanceCouleurs(couleurCentroide, c);
+
+            if (distance < distanceMin) {
+                distanceMin = distance;
+                meilleurBiome = biome;
+            }
+        }
+        // on retourne le nom du biome le plus proche
+        return meilleurBiome;
+    }
+
+    // getter pour récupérer la couleur exacte d'un biome
+    public Color getCouleurBiome(String nomBiome) {
+        return listeCouleurs.get(nomBiome);
+    }
     public Color getPlusProche(Color c) {
         Color min = couleurs.get(0);
         for (int i = 1; i < couleurs.size(); i++) {
