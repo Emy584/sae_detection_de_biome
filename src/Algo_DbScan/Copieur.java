@@ -14,9 +14,10 @@ public class Copieur {
     public static void copierImage(BufferedImage image, double eps, int minPts, HashSet<Integer> pts) {
 
         AlgoDbScan a = new AlgoDbScan() ;
-        a.DBSCAN(pts, eps, minPts);
+        ArrayList<Integer> bruits = a.DBSCAN(pts, eps, minPts);
         System.out.println("Nombre de couleurs uniques : " + pts.size());
         System.out.println("Nombre de clusters : " + a.clusters.size());
+        System.out.println("Nombre de bruits : " + bruits.size());
         System.out.println("Taille palette : " + a.getPalette().size());
         Palette p = new Palette(a.getPalette());
         BufferedImage image2 = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
@@ -24,29 +25,34 @@ public class Copieur {
             for (int y = 0; y < image.getHeight(); y++) {
                 int rgb = image.getRGB(x, y);
                 Color c = new Color(rgb);
-                image2.setRGB(x, y, p.getPlusProche(c).getRGB());
+                if (bruits.contains(c.getRGB())) {
+                    image2.setRGB(x, y, Color.red.getRGB());
+                } else {
+                    image2.setRGB(x, y, p.getPlusProche(c).getRGB());
+                }
             }
         }
         try {
-            ImageIO.write(image2, "PNG", new File("test.png"));
+            ImageIO.write(image2, "PNG", new File("./img/result/test.png"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
     public static void optimiserParam(BufferedImage image, HashSet<Integer> pts) {
-        double[] epsTests = {100, 200, 400, 900, 1600, 2500, 4900, 10000};
-        int[] minPtsTests = {1, 2, 3, 4, 5, 6, 7, 8, 9,  10, 20};
+        double[] epsTests = {1, 2, 3, 4, 5, 6,7,8,9,10,15,20,25,30,35};
+        int[] minPtsTests = {1, 2, 3, 4, 5, 6, 7, 8, 9,  10};
 
         double meilleurEps = 0;
         int meilleurMinPts = 0;
         int meilleureTaillePalette = 0;
+        int meilleurNbBruits = Integer.MAX_VALUE;
         double meilleurSim = 0 ;
 
         for (double eps : epsTests) {
             for (int minPts : minPtsTests) {
 
                 AlgoDbScan algo = new AlgoDbScan();
-                algo.DBSCAN(pts, eps, minPts);
+                ArrayList<Integer> bruits = algo.DBSCAN(pts, eps, minPts);
 
                 ArrayList<Color> paletteCouleurs = algo.getPalette();
 
@@ -71,12 +77,17 @@ public class Copieur {
                 }
 
                 double similarite = OutilCouleur.similarite(image, imageTest);
+                int nbBruits = bruits.size();
 
-                if (similarite > meilleurSim) {
+
+                if (nbBruits < meilleurNbBruits ||
+                        (nbBruits == meilleurNbBruits && similarite > meilleurSim)) {
+
                     meilleurEps = eps;
                     meilleurMinPts = minPts;
                     meilleurSim = similarite;
                     meilleureTaillePalette = paletteCouleurs.size();
+                    meilleurNbBruits = nbBruits;
                 }
             }
         }
@@ -84,6 +95,7 @@ public class Copieur {
         System.out.println("eps : " + meilleurEps);
         System.out.println("minPts : " + meilleurMinPts);
         System.out.println("taille palette : " + meilleureTaillePalette);
+        System.out.println("nb bruits : " + meilleurNbBruits);
         System.out.println("similarite : " + meilleurSim);
     }
 }
