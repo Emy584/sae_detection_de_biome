@@ -1,12 +1,19 @@
 package outils;
 
+import Normes.NormeRedmean;
+
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Palette {
     
     // toutes les couleurs disponibles
     private static HashMap<String, Color> listeCouleurs;
+    ArrayList<Color> couleurs ;
+    public Palette(ArrayList<Color> couleurs) {
+        this.couleurs = couleurs ;
+    }
 
 
 
@@ -22,6 +29,27 @@ public class Palette {
         listeCouleurs.put("Glacier", new Color(200, 200, 200));
         listeCouleurs.put("Eau peu profonde", new Color(49, 83, 100));
         listeCouleurs.put("Eau profonde", new Color(12, 31, 47));
+    }
+
+    public Color getPlusProche(Color c) {
+        Color min = couleurs.get(0);
+        for (int i = 1; i < couleurs.size(); i++) {
+            if(OutilCouleur.distanceColor(c.getRGB(),couleurs.get(i).getRGB())<OutilCouleur.distanceColor(c.getRGB(),min.getRGB())){
+                min = couleurs.get(i);
+            }
+        }
+        return min;
+    }
+
+    public Color getPlusProcheRedmean(Color c) {
+        Color min = couleurs.getFirst();
+        NormeRedmean norm = new NormeRedmean();
+        for (int i = 1; i < couleurs.size(); i++) {
+            if(norm.distanceCouleurs(c,couleurs.get(i))<norm.distanceCouleurs(c,min)){
+                min = couleurs.get(i);
+            }
+        }
+        return min;
     }
 
 }

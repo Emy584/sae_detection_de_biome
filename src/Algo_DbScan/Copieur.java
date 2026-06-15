@@ -1,6 +1,7 @@
 package Algo_DbScan;
 
 import outils.OutilCouleur;
+import outils.Palette;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
