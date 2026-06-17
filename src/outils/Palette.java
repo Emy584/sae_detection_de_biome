@@ -72,6 +72,20 @@ public class Palette {
         return min;
     }
 
+    public Color getPlusProcheTags(Color c) {
+        Color min = null;
+
+        for (Color couleur : listeCouleurs.values()) {
+            if (min == null ||
+                    OutilCouleur.distanceColor(c.getRGB(), couleur.getRGB())
+                            < OutilCouleur.distanceColor(c.getRGB(), min.getRGB())) {
+                min = couleur;
+            }
+        }
+
+        return min;
+    }
+
     public Color getPlusProcheRedmean(Color c) {
         Color min = couleurs.getFirst();
         NormeRedmean norm = new NormeRedmean();

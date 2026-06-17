@@ -1,22 +1,39 @@
 package Algo_DbScan;
 
 import outils.OutilCouleur;
-
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 
+/**
+ * Implémentation de l'algorithme DBSCAN pour regrouper des pixels
+ * selon leur proximité de couleur.
+ */
 public class AlgoDbScan {
+    /** Liste des pixels déjà traités. */
     public ArrayList<Pixel> xTraite ;
+
+    /** Ensemble des pixels à analyser. */
     public ArrayList<Pixel> x ;
+
+    /** Liste des clusters trouvés. */
     public ArrayList<ArrayList<Pixel>> clusters ;
 
+    /**
+     * Initialise les structures de données de l'algorithme.
+     */
     public AlgoDbScan() {
         this.xTraite = new ArrayList<>();
         this.clusters = new ArrayList<>();
     }
 
-
+    /**
+     * Exécute l'algorithme DBSCAN.
+     *
+     * @param x ensemble des pixels à analyser
+     * @param eps distance maximale pour être considéré comme voisin
+     * @param minPts nombre minimum de voisins pour former un cluster
+     * @return liste des pixels considérés comme du bruit
+     */
     public ArrayList<Pixel> DBSCAN(ArrayList<Pixel> x, double eps, int minPts) {
         ArrayList<Pixel> bruits = new ArrayList<>() ;
         this.x = x;
@@ -38,6 +55,15 @@ public class AlgoDbScan {
         return bruits ;
     }
 
+    /**
+     * Étend un cluster à partir d'un pixel noyau.
+     *
+     * @param xn pixel de départ
+     * @param vn liste des voisins du pixel
+     * @param cluster cluster en cours de construction
+     * @param eps distance maximale entre voisins
+     * @param minPts nombre minimum de voisins pour former un cluster
+     */
     public void expandCluster(Pixel xn, ArrayList<Pixel> vn, ArrayList<Pixel> cluster, double eps, int minPts) {
         cluster.add(xn);
         int i = 0;
@@ -61,6 +87,12 @@ public class AlgoDbScan {
         }
     }
 
+    /**
+     * Vérifie si un pixel appartient déjà à un cluster.
+     *
+     * @param p pixel à vérifier
+     * @return true si le pixel est déjà dans un cluster, false sinon
+     */
     private boolean estDansUnCluster(Pixel p) {
         for (ArrayList<Pixel> cluster : this.clusters) {
             if (cluster.contains(p)) {
@@ -69,6 +101,14 @@ public class AlgoDbScan {
         }
         return false;
     }
+
+
+    /**
+     * Calcule une palette de couleurs représentative des clusters.
+     * Chaque couleur correspond à la moyenne des couleurs d'un cluster.
+     *
+     * @return palette des couleurs moyennes des clusters
+     */
     public ArrayList<Color> getPalette() {
         ArrayList<Color> pal = new ArrayList<>();
 
@@ -94,6 +134,14 @@ public class AlgoDbScan {
         return pal;
     }
 
+
+    /**
+     * Recherche tous les voisins d'un pixel dans un rayon donné.
+     *
+     * @param xn pixel de référence
+     * @param eps distance maximale entre deux pixels
+     * @return liste des voisins trouvés
+     */
     public ArrayList<Pixel> regionQuery(Pixel xn, double eps) {
         System.out.println("Recherche de voisin");
         ArrayList<Pixel> v = new ArrayList<>();

@@ -31,7 +31,7 @@ public class Copieur {
                 if (bruits.contains(new Pixel(x,y,rgb))) {
                     image2.setRGB(x, y, Color.red.getRGB());
                 } else {
-                    image2.setRGB(x, y, p.getPlusProcheTags(c).getRGB());
+                    image2.setRGB(x, y, p.getPlusProche(c).getRGB());
                 }
             }
         }
