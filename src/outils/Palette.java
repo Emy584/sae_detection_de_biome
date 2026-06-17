@@ -27,7 +27,7 @@ public class Palette {
         listeCouleurs.put("Prairie", new Color(104, 95, 82));
         listeCouleurs.put("Désert", new Color(152, 140, 120));
         listeCouleurs.put("Glacier", new Color(200, 200, 200));
-        listeCouleurs.put("Eau peu profonde", new Color(49, 83, 100));
+        listeCouleurs.put("Eau peu profonde", new Color(35, 58, 69));
         listeCouleurs.put("Eau profonde", new Color(12, 31, 47));
     }
 
