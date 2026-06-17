@@ -36,6 +36,7 @@ public class AlgoDbScan {
      * @return liste des pixels considérés comme du bruit
      */
     public ArrayList<Pixel> DBSCAN(ArrayList<Pixel> x, double eps, int minPts) {
+        System.out.println("Début de la boucle DBSCAN...");
         ArrayList<Pixel> bruits = new ArrayList<>() ;
         this.x = x;
         int compte = 0 ;
@@ -54,6 +55,7 @@ public class AlgoDbScan {
                 bruits.add(xn);
             }
         }
+        System.out.println("Fin DBSCAN");
         return bruits ;
     }
 
@@ -104,21 +106,21 @@ public class AlgoDbScan {
         return false;
     }
 
-    /**
-     * Recherche tous les voisins d'un pixel dans un rayon donné.
-     *
-     * @param xn pixel de référence
-     * @param eps distance maximale entre deux pixels
-     * @return liste des voisins trouvés
-     */
     public ArrayList<Pixel> regionQuery(Pixel xn, double eps) {
         ArrayList<Pixel> v = new ArrayList<>();
-        //  System.out.println("Recherche de voisin");
+        double eps2 = eps * eps;
+
         for (Pixel xi : this.x) {
-            if (xn.x != xi.x && xn.y != xi.y && Pixel.distance(xn, xi) <= eps) {
+            if (xn == xi) continue;
+
+            int dx = xi.x - xn.x;
+            int dy = xi.y - xn.y;
+
+            if (dx * dx + dy * dy <= eps2) {
                 v.add(xi);
             }
         }
+
         return v;
     }
 }

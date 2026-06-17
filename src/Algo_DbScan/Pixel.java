@@ -11,9 +11,16 @@ public class Pixel {
         this.c =couleur;
     }
 
-    public static double distance(Pixel p1, Pixel p2) {
-        int dx = p2.x - p1.x;
-        int dy = p2.y - p1.y;
-        return Math.sqrt(dx * dx + dy * dy);
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Pixel)) return false;
+        Pixel object = (Pixel) obj;
+        return this.x == object.x && this.y == object.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * x + y;
     }
 }

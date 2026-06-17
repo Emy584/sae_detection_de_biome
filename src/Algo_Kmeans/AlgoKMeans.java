@@ -36,7 +36,7 @@ public class AlgoKMeans implements AlgoInterface {
      * @return un tableau contenant une liste de groupes
      */
     @Override
-    public List<List<Pixel>>[] algorithmeClustering(Pixel[] tableauD) {
+    public ArrayList<ArrayList<Pixel>> algorithmeClustering(Pixel[] tableauD) {
 
         // nombre total de pixels
         int nbObj = tableauD.length;
@@ -166,7 +166,7 @@ public class AlgoKMeans implements AlgoInterface {
         centroidesFinaux = centroides;
 
         // on regroupe les pixels par groupe
-        List<List<Pixel>> groupesDePixels = new ArrayList<>();
+        ArrayList<ArrayList<Pixel>> groupesDePixels = new ArrayList<>();
         for (int j = 0; j < nbGroupes; j++) {
             groupesDePixels.add(new ArrayList<>());
         }
@@ -174,9 +174,7 @@ public class AlgoKMeans implements AlgoInterface {
             groupesDePixels.get(groupes[i]).add(tableauD[i]);
         }
 
-        // le res est un tableau contenant une seule liste de groupes
-        List<List<Pixel>>[] resultat = new List[]{groupesDePixels};
-        return resultat;
+        return groupesDePixels;
     }
 
     /**
@@ -275,7 +273,7 @@ public class AlgoKMeans implements AlgoInterface {
 
             // exécution de K Means
             System.out.println("Lancement du K-Means avec " + nbGroupes + " groupes...");
-            List<List<Pixel>> groupes = algorithmeClustering(tableauPixel)[0];
+            ArrayList<ArrayList<Pixel>> groupes = algorithmeClustering(tableauPixel);
 
             // création de l'image
             BufferedImage nvImage = new BufferedImage(largeur, longeur, BufferedImage.TYPE_INT_ARGB);
@@ -294,7 +292,7 @@ public class AlgoKMeans implements AlgoInterface {
 
             // fusion des doublons de biomes car plusieurs groupes K-means peuvent correspondre au même biome
             Palette palette = new Palette();
-            Map<String, List<Pixel>> pixelsParBiomeUnique = new HashMap<>();
+            Map<String, ArrayList<Pixel>> pixelsParBiomeUnique = new HashMap<>();
 
             for (int i = 0; i < nbGroupes; i++) {
                 // couleur du centroïde du groupe i
@@ -331,7 +329,7 @@ public class AlgoKMeans implements AlgoInterface {
                 BufferedImage imageBiome = new BufferedImage(largeur, longeur, BufferedImage.TYPE_INT_ARGB);
                 imageBiome.getGraphics().drawImage(imageEclaircie, 0, 0, null);
 
-                List<Pixel> pixelsDuBiome = pixelsParBiomeUnique.get(nomBiome);
+                ArrayList<Pixel> pixelsDuBiome = pixelsParBiomeUnique.get(nomBiome);
                 for (Pixel p : pixelsDuBiome) {
                     imageBiome.setRGB(p.x, p.y, imageSource.getRGB(p.x, p.y));
                 }

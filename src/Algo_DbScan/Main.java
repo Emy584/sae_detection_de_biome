@@ -1,6 +1,9 @@
 package Algo_DbScan;
 
 import Algo_Kmeans.AlgoKMeans;
+import Normes.NormeCIELAB;
+import Normes.NormeRGB;
+import outils.OutilCouleur;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -16,7 +19,7 @@ public class Main {
     static void main(String[] args) {
 
         try {
-            BufferedImage image = ImageIO.read(new File("./img/image.jpg"));
+            BufferedImage image = ImageIO.read(new File("./img/Planete1(200&200).jpg"));
 
             ArrayList<Pixel> pts = new ArrayList<>() ;
             for (int x = 0; x < image.getWidth(); x++) {
@@ -25,13 +28,13 @@ public class Main {
                     pts.add(new Pixel(x, y, rgb));
                 }
             }
-
-            AlgoKMeans ak = new AlgoKMeans(10);
-            ArrayList<ArrayList<Pixel>> biomes = ak.algorithmeClustering(pts);
+            Pixel[] tpts = pts.toArray(new Pixel[pts.size()]);
+            AlgoKMeans ak = new AlgoKMeans(10, new NormeCIELAB());
+            ArrayList<ArrayList<Pixel>> biomes = ak.algorithmeClustering(tpts);
             AlgoDbScan ads = new AlgoDbScan();
-            double eps = 10;
-            int minPts = 5;
-            ArrayList<Pixel> bruits = ads.DBSCAN(biomes.get(0), eps, minPts);
+            double eps = 3;
+            int minPts = 3;
+            ArrayList<Pixel> bruits = ads.DBSCAN(biomes.get(2), eps, minPts);
 
             //70 au rouge et au bleu si pas dans a liste
 
@@ -40,10 +43,17 @@ public class Main {
                     image.getHeight(),
                     BufferedImage.TYPE_3BYTE_BGR
             );
+            for (int x = 0; x < image.getWidth(); x++) {
+                for (int y = 0; y < image.getHeight(); y++) {
+                    int numRgbBase = image.getRGB(x, y);
+                    image2.setRGB(x, y, OutilCouleur.eclaircirPixel(numRgbBase, 75.0));
+                }
+            }
 
             Random random = new Random();
 
             // Pour chaque cluster
+            System.out.println("AffichageCluster");
             for (ArrayList<Pixel> cluster : ads.clusters) {
 
                 Color couleurCluster = new Color(
@@ -57,28 +67,17 @@ public class Main {
                 }
             }
 
+            System.out.println("AffichageBruit");
             // Pour les bruits
             for (Pixel p : bruits) {
                 image2.setRGB(p.x, p.y, Color.RED.getRGB());
             }
 
+            System.out.println("AffichageReste");
             // Pour tous les autres pixels
-            for (int x = 0; x < image.getWidth(); x++) {
-                for (int y = 0; y < image.getHeight(); y++) {
-
-                    if (image2.getRGB(x, y) == 0) {
-                        Color c = new Color(image.getRGB(x, y));
-
-                        int r = Math.min(c.getRed() + 70, 255);
-                        int g = c.getGreen();
-                        int b = Math.min(c.getBlue() + 70, 255);
-
-                        image2.setRGB(x, y, new Color(r, g, b).getRGB());
-                    }
-                }
-            }
-
+            ImageIO.write(image2, "png", new File("./img/result/dbscan_result.png"));
             System.out.println("Traitement terminé.");
+
 
         } catch (IOException e) {
             System.err.println("Erreur lors du chargement de l'image : " + e.getMessage());
