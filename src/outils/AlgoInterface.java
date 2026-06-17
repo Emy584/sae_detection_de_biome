@@ -2,9 +2,9 @@ package outils;
 
 import Algo_DbScan.Pixel;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public interface AlgoInterface {
 
-    List<List<Pixel>>[] algorithmeClustering(Pixel[] tableauD);
+    ArrayList<ArrayList<Pixel>> algorithmeClustering(Pixel[] tableauD);
 }
