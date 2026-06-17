@@ -57,7 +57,7 @@ public class MainDetectionBiomes {
         }
 
         // une image par biome
-        new File("img/biomes");
+        new File("img/biomes_HAC");
         for (String nomBiome : biomes.keySet()) {
             // Copier le fond
             BufferedImage imgBiome = new BufferedImage(largeur, hauteur, BufferedImage.TYPE_INT_RGB);
@@ -77,7 +77,7 @@ public class MainDetectionBiomes {
             g2.drawString(nomBiome, 20, 50);
             g2.dispose();
 
-            ImageIO.write(imgBiome, "png", new File("img/biomes/" + nomBiome + ".png"));
+            ImageIO.write(imgBiome, "png", new File("img/biomes_HAC/" + nomBiome + ".png"));
             System.out.println("Sauvegardé : " + nomBiome);
         }
     }

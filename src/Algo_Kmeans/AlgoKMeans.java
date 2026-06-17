@@ -11,10 +11,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AlgoKMeans implements AlgoInterface {
 
@@ -78,7 +75,7 @@ public class AlgoKMeans implements AlgoInterface {
             }
         }
 
-        System.out.println("Début de la boucle K-Means...");
+        System.out.println("Début de la boucle K-Means");
         int numeroIteration = 1;
 
         // boucle principale
@@ -242,6 +239,35 @@ public class AlgoKMeans implements AlgoInterface {
     }
 
     /**
+     * méthode qui fusionne les groupes K-means qui correspondent au même biome
+     * @param groupes les groupes issus de algorithmeClustering
+     * @param palette la palette utilisée pour identifier les biomes
+     * @return une map nom de biome -> tous les pixels des groupes concernés
+     */
+    public Map<String, ArrayList<Pixel>> fusionnerParBiome(ArrayList<ArrayList<Pixel>> groupes, Palette palette) {
+        // map ordonnée qui contiendra : NomBiome -> liste de pixels fusionnés
+        Map<String, ArrayList<Pixel>> pixelsParBiome = new LinkedHashMap<>();
+
+        //parcourt chaque cluster K-means
+        for (int i = 0; i < groupes.size(); i++) {
+            // récupère la couleur du centroïde final du cluster i
+            int r = Math.max(0, Math.min(255, (int) centroidesFinaux[i][0]));
+            int g = Math.max(0, Math.min(255, (int) centroidesFinaux[i][1]));
+            int b = Math.max(0, Math.min(255, (int) centroidesFinaux[i][2]));
+            Color c = new Color(r, g, b);
+
+            // trouve le biome dont la couleur de référence est la plus proche du centroïde
+            String nomBiome = palette.trouverBiomeLePlusProche(c, norme);
+
+            // si le biome n'existe pas encore dans la map, on l'ajoute
+            pixelsParBiome.putIfAbsent(nomBiome, new ArrayList<>());
+            // on ajoute tous les pixels du cluster i dans le biome correspondant
+            pixelsParBiome.get(nomBiome).addAll(groupes.get(i));
+        }
+        return pixelsParBiome;
+    }
+
+    /**
      * méthode qui applique K Means sur une image complète
      * @param cheminSource chemin de l'image d'entrée
      * @param cheminDestination chemin de l'image de sortie
@@ -292,25 +318,10 @@ public class AlgoKMeans implements AlgoInterface {
 
             // fusion des doublons de biomes car plusieurs groupes K-means peuvent correspondre au même biome
             Palette palette = new Palette();
-            Map<String, ArrayList<Pixel>> pixelsParBiomeUnique = new HashMap<>();
+            Map<String, ArrayList<Pixel>> pixelsParBiomeUnique = fusionnerParBiome(groupes, palette);
 
-            for (int i = 0; i < nbGroupes; i++) {
-                // couleur du centroïde du groupe i
-                int r = Math.max(0, Math.min(255, (int) centroidesFinaux[i][0]));
-                int g = Math.max(0, Math.min(255, (int) centroidesFinaux[i][1]));
-                int b = Math.max(0, Math.min(255, (int) centroidesFinaux[i][2]));
-                Color couleurCentroide = new Color(r, g, b);
-
-                // on utilise la norme demandée pour trouver le biome
-                String nomBiome = palette.trouverBiomeLePlusProche(couleurCentroide, norme);
-
-                // on crée la liste du biome si elle n'existe pas encore
-                pixelsParBiomeUnique.putIfAbsent(nomBiome, new ArrayList<>());
-
-                // on ajoute les pixels de ce groupe dans la liste du biome concerné
-                pixelsParBiomeUnique.get(nomBiome).addAll(groupes.get(i));
-
-                System.out.println("Le groupe " + i + " est fusionné dans le biome : " + nomBiome);
+            for (String nomBiome : pixelsParBiomeUnique.keySet()) {
+                System.out.println("Biome fusionné : " + nomBiome + " (" + pixelsParBiomeUnique.get(nomBiome).size() + " pixels)");
             }
 
             // génération du fond éclairci
@@ -345,7 +356,7 @@ public class AlgoKMeans implements AlgoInterface {
             // sauvegarde  de l'image
             File fichierDest = new File(cheminDestination);
             ImageIO.write(nvImage, "png", fichierDest);
-            System.out.println("Algo terminé !");
+            System.out.println("Algo terminé");
 
         } catch (IOException e) {
             System.err.println("Erreur : " + e.getMessage());
