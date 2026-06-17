@@ -3,6 +3,7 @@ package Algo_DbScan;
 import outils.OutilCouleur;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Implémentation de l'algorithme DBSCAN pour regrouper des pixels
@@ -10,7 +11,7 @@ import java.util.ArrayList;
  */
 public class AlgoDbScan {
     /** Liste des pixels déjà traités. */
-    public ArrayList<Pixel> xTraite ;
+    public HashSet<Pixel> xTraite ;
 
     /** Ensemble des pixels à analyser. */
     public ArrayList<Pixel> x ;
@@ -22,7 +23,7 @@ public class AlgoDbScan {
      * Initialise les structures de données de l'algorithme.
      */
     public AlgoDbScan() {
-        this.xTraite = new ArrayList<>();
+        this.xTraite = new HashSet<>();
         this.clusters = new ArrayList<>();
     }
 
@@ -37,8 +38,9 @@ public class AlgoDbScan {
     public ArrayList<Pixel> DBSCAN(ArrayList<Pixel> x, double eps, int minPts) {
         ArrayList<Pixel> bruits = new ArrayList<>() ;
         this.x = x;
+        int compte = 0 ;
         for (Pixel xn : x) {
-            System.out.println("Nouveau Point");
+            compte += 1 ;
             if (this.xTraite.contains(xn)) {
                 continue;
             }
@@ -102,39 +104,6 @@ public class AlgoDbScan {
         return false;
     }
 
-
-    /**
-     * Calcule une palette de couleurs représentative des clusters.
-     * Chaque couleur correspond à la moyenne des couleurs d'un cluster.
-     *
-     * @return palette des couleurs moyennes des clusters
-     */
-    public ArrayList<Color> getPalette() {
-        ArrayList<Color> pal = new ArrayList<>();
-
-        for (ArrayList<Pixel> cluster : this.clusters) {
-            long r = 0, g = 0, b = 0;
-
-            for (Pixel rgb : cluster) {
-                Color c = new Color(rgb.c);
-                r += c.getRed();
-                g += c.getGreen();
-                b += c.getBlue();
-            }
-
-            int size = cluster.size();
-
-            pal.add(new Color(
-                    (int) (r / size),
-                    (int) (g / size),
-                    (int) (b / size)
-            ));
-        }
-
-        return pal;
-    }
-
-
     /**
      * Recherche tous les voisins d'un pixel dans un rayon donné.
      *
@@ -143,10 +112,10 @@ public class AlgoDbScan {
      * @return liste des voisins trouvés
      */
     public ArrayList<Pixel> regionQuery(Pixel xn, double eps) {
-        System.out.println("Recherche de voisin");
         ArrayList<Pixel> v = new ArrayList<>();
+        //  System.out.println("Recherche de voisin");
         for (Pixel xi : this.x) {
-            if (xn.c != xi.c && OutilCouleur.distanceColor(xn.c, xi.c) <= eps) {
+            if (xn.x != xi.x && xn.y != xi.y && Pixel.distance(xn, xi) <= eps) {
                 v.add(xi);
             }
         }
