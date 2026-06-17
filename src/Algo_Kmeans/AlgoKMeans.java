@@ -1,173 +1,256 @@
 package Algo_Kmeans;
 
+import Algo_DbScan.Pixel;
 import Normes.NormeCouleurs;
-import Normes.NormeRGB;
-import outils.OutilCouleur;
 import outils.OutilCouleur;
 import outils.AlgoInterface;
 import outils.Palette;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-
-
-/**
- * Réflexion
- */
-// on definit rouge bleu vert avec getTabColor
-// on place nb groupe centroides aléatoires
-// charge l'image
-// pour longueur
-// pour largeur
-// on place chaque pixel dans un groupe (tab[]) en fonction de la distance de couleur la plus proche d'un centroide
-// mise a jour des centroides avec moyenne des pixels des goupes
-// boucle sur chaque groupe (tab) pour calcul moyenne
-// les nbGroupe moyennes deviennent les new centroides
-// on place chaque pixel dans un groupe (tab[]) en fonction de la distance de couleur la plus proche d'un centroide
-// mise a jour des centroides avec moyenne des pixels des goupes
-// boucle sur chaque groupe (tab) pour calcul moyenne
-// les nbGroupe moyennes deviennent les new centroides
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AlgoKMeans implements AlgoInterface {
 
-    // nombre de groupe
+    // nb biomes
     private int nbGroupes;
+    // tableau des centroides
     private double[][] centroidesFinaux;
+    // norme utilisée
+    private NormeCouleurs norme;
 
-
-    public AlgoKMeans(int nbGroupes) {
+    public AlgoKMeans(int nbGroupes, NormeCouleurs norme) {
         this.nbGroupes = nbGroupes;
+        this.norme = norme;
     }
 
     /**
-     * méthode qui applique l'algorithme de Kmeans
-     * @param tableauD un tableau à deux dimensions avec l'index d'un pixel et [r,g,b]
-     * @return un tableau de groupes
+     * méthode qui applique l'algorithme de Kmeans sur un tableau de pixel
+     * @param tableauD le tableau qui contient les pixels à regrouper
+     * @return un tableau contenant une liste de groupes
      */
     @Override
-    public int[] algorithmeClustering(int[][] tableauD) {
-        // on recup la longueur du tableau a deux dimensions
-        // nb de pixels
+    public List<List<Pixel>>[] algorithmeClustering(Pixel[] tableauD) {
+
+        // nombre total de pixels
         int nbObj = tableauD.length;
-        // r, g et b
-        int nbCar = tableauD[0].length;
 
         // initialise les centroides
         double[][] centroides = initialiserCentroides(tableauD);
-
-        // création d'un tableau de groupe
+        // numéro du cluster auquel appartient le pixel i
         int[] groupes = new int[nbObj];
-
-        // condition de boucle
+        // indique si une itération a modifié des affectations
         boolean changement = true;
 
-        // boucle
+        // mise en cache des couleurs
+        boolean utiliseCIELAB = (norme instanceof Normes.NormeCIELAB);
+        boolean utiliseRGB = (norme instanceof Normes.NormeRGB);
+        boolean cheminRapide = utiliseCIELAB || utiliseRGB;
+
+        double[][] cachePixels = null;
+
+        // pré-calcul des couleurs des pixels
+        if (cheminRapide) {
+            cachePixels = new double[nbObj][3];
+            System.out.println("Pré-calcul des couleurs en cache");
+
+            for (int i = 0; i < nbObj; i++) {
+                Color c = new Color(tableauD[i].c);
+
+                if (utiliseCIELAB) {
+                    // on stocke les valeurs L*a*b*
+                    int[] lab = Normes.MainCIE94.rgb2lab(c.getRed(), c.getGreen(), c.getBlue());
+                    cachePixels[i][0] = lab[0];
+                    cachePixels[i][1] = lab[1];
+                    cachePixels[i][2] = lab[2];
+                } else {
+                    // RGB classique
+                    cachePixels[i][0] = c.getRed();
+                    cachePixels[i][1] = c.getGreen();
+                    cachePixels[i][2] = c.getBlue();
+                }
+            }
+        }
+
+        System.out.println("Début de la boucle K-Means...");
+        int numeroIteration = 1;
+
+        // boucle principale
         while (changement) {
             changement = false;
 
+            // cache des centroïdes pour cette itération
+            double[][] cacheCentroides = null;
+
+            if (cheminRapide) {
+                cacheCentroides = new double[nbGroupes][3];
+                for (int j = 0; j < nbGroupes; j++) {
+                    // on force les valeurs RGB dans [0,255]
+                    int r = Math.max(0, Math.min(255, (int) centroides[j][0]));
+                    int g = Math.max(0, Math.min(255, (int) centroides[j][1]));
+                    int b = Math.max(0, Math.min(255, (int) centroides[j][2]));
+
+                    if (utiliseCIELAB) {
+                        // on stocke les valeurs L*a*b*
+                        int[] lab = Normes.MainCIE94.rgb2lab(r, g, b);
+                        cacheCentroides[j][0] = lab[0];
+                        cacheCentroides[j][1] = lab[1];
+                        cacheCentroides[j][2] = lab[2];
+                    } else {
+                        // RGB classique
+                        cacheCentroides[j][0] = r;
+                        cacheCentroides[j][1] = g;
+                        cacheCentroides[j][2] = b;
+                    }
+                }
+            }
+
+            // Boucle d'assignation
             for (int i = 0; i < nbObj; i++) {
                 int meilleurGroupe = 0;
                 double meilleurDistance = Double.MAX_VALUE;
 
-                for (int j = 0; j < nbGroupes; j++) {
-                    double distance = calculeDistance(tableauD[i], centroides[j]);
+                Color couleurPixelLente = null;
 
+                // on doit reconstruire la couleur
+                if (!cheminRapide) {
+                    couleurPixelLente = new Color(tableauD[i].c);
+                }
+
+                // Comparaison avec chaque centroïde
+                for (int j = 0; j < nbGroupes; j++) {
+                    double distance;
+
+                    if (cheminRapide) {
+                        // distance euclidienne
+                        double d0 = cachePixels[i][0] - cacheCentroides[j][0];
+                        double d1 = cachePixels[i][1] - cacheCentroides[j][1];
+                        double d2 = cachePixels[i][2] - cacheCentroides[j][2];
+
+                        distance = (d0 * d0) + (d1 * d1) + (d2 * d2);
+                    } else {
+                        // norme autre que CIELAB
+                        Color couleurCentroide = new Color(
+                                Math.max(0, Math.min(255, (int) centroides[j][0])),
+                                Math.max(0, Math.min(255, (int) centroides[j][1])),
+                                Math.max(0, Math.min(255, (int) centroides[j][2]))
+                        );
+                        distance = norme.distanceCouleurs(couleurPixelLente, couleurCentroide);
+                    }
+
+                    // mise à jour du meilleur cluster
                     if (distance < meilleurDistance) {
                         meilleurDistance = distance;
                         meilleurGroupe = j;
                     }
                 }
+
+                // si pixel change de cluster, on continue une itération supplémentaire
                 if (groupes[i] != meilleurGroupe) {
                     groupes[i] = meilleurGroupe;
                     changement = true;
                 }
             }
+            // recalcul des centroïdes après l'assignation
             centroides = recalculerCentroides(tableauD, groupes);
+            numeroIteration++;
         }
+
+        // Sauvegarde des centroïdes finaux
         centroidesFinaux = centroides;
-        return groupes;
+
+        // on regroupe les pixels par groupe
+        List<List<Pixel>> groupesDePixels = new ArrayList<>();
+        for (int j = 0; j < nbGroupes; j++) {
+            groupesDePixels.add(new ArrayList<>());
+        }
+        for (int i = 0; i < nbObj; i++) {
+            groupesDePixels.get(groupes[i]).add(tableauD[i]);
+        }
+
+        // le res est un tableau contenant une seule liste de groupes
+        List<List<Pixel>>[] resultat = new List[]{groupesDePixels};
+        return resultat;
     }
 
     /**
-     * méthode permettant d'initialiser les centroides
-     * @param tableauD le tableau de pixels
-     * @return un tableau à deux dimensions avec les centroides
+     * méthode d'initialisation des centroides
+     * @param tableauD  le tableau qui contient les pixels à regrouper
+     * @return un tableau 2D contenant les centroïdes sous forme [k][RGB]
      */
-    public double[][] initialiserCentroides(int[][] tableauD) {
+    public double[][] initialiserCentroides(Pixel[] tableauD) {
+        // nbGroupes lignes, 3 colonnes (R,G,B)
         double[][] centroides = new double[nbGroupes][3];
         int nbObjets = tableauD.length;
 
-        // Choix aléatoire
+        // pour chaque groupe, on choisit un pixel aléatoire comme centroïde initial
         for (int k = 0; k < nbGroupes; k++) {
+            // sélection d'un index aléatoire dans les pixels
             int index = (int) (Math.random() * nbObjets);
+            // on récupère la couleur du pixel choisi
+            Color c = new Color(tableauD[index].c);
 
-            centroides[k][0] = tableauD[index][0];
-            centroides[k][1] = tableauD[index][1];
-            centroides[k][2] = tableauD[index][2];
+            // on initialise le centroïde avec les valeurs RGB du pixel
+            centroides[k][0] = c.getRed();
+            centroides[k][1] = c.getGreen();
+            centroides[k][2] = c.getBlue();
         }
         return centroides;
     }
 
     /**
-     * méthode de calcul de la distance entre chaque rgb du tableau de pixels et du rgb de chaque centroide
-     * @param pixelTab tableau de pixels
-     * @param pixelCentroide tableau de centroides
-     * @return la distance moyenne entre pixel et centroides
+     * méthode de recalcul des centroides
+     * @param tableauD  le tableau qui contient les pixels à regrouper
+     * @return  un tableau 2D contenant les nouveaux centroïdes [k][RGB]
      */
-    public double calculeDistance(int[] pixelTab, double[] pixelCentroide) {
-
-        double varR = pixelTab[0] - pixelCentroide[0];
-        double varG = pixelTab[1] - pixelCentroide[1];
-        double varB = pixelTab[2] - pixelCentroide[2];
-
-        // retourne la moyenne
-        return Math.sqrt(Math.pow(varR, 2) + Math.pow(varG, 2) + Math.pow(varB, 2));
-    }
-
-    /**
-     * méthode qui réinitialise les centroides
-     * @param tableauD tableau de pixels
-     * @param groupes tableau des groupes
-     * @return retourne un tableau de centroides avec index et [r,g,b]
-     */
-    public double[][] recalculerCentroides(int[][] tableauD, int[] groupes) {
-        // nouveau tableau de centroides
+    public double[][] recalculerCentroides(Pixel[] tableauD, int[] groupes) {
+        // nouveau tableau des centroïdes
         double[][] newCentroides = new double[nbGroupes][3];
-        // servira d'index
+        // compte le nb de pixel appartenant à chaque groupe
         int[] compte = new int[nbGroupes];
 
-        // somme des pixels par groupe
+        // accumulation des valeurs RGB pour chaque groupe
         for (int i = 0; i < tableauD.length; i++) {
+            // groupe du pixel i
             int g = groupes[i];
-            newCentroides[g][0] += tableauD[i][0];
-            newCentroides[g][1] += tableauD[i][1];
-            newCentroides[g][2] += tableauD[i][2];
+            Color c = new Color(tableauD[i].c);
+
+            // additionne les composantes RGB du pixel dans le centroïde correspondant
+            newCentroides[g][0] += c.getRed();
+            newCentroides[g][1] += c.getGreen();
+            newCentroides[g][2] += c.getBlue();
+
+            // incrémente le nombre de pixels dans ce groupe
             compte[g]++;
         }
 
-        // moyenne des couleurs
+        // moyenne des valeurs RGB pour obtenir les nouveaux centroïdes
         for (int k = 0; k < nbGroupes; k++) {
+            // si le groupe contient au moins un pixel
             if (compte[k] > 0) {
                 newCentroides[k][0] /= compte[k];
                 newCentroides[k][1] /= compte[k];
                 newCentroides[k][2] /= compte[k];
             }
+            // sinon inchangé
         }
         return newCentroides;
     }
 
-
     /**
-     * méthode de résolution par K Means
-     * @param cheminSource source de l'image
-     * @param cheminDestination destination de l'image créée
+     * méthode qui applique K Means sur une image complète
+     * @param cheminSource chemin de l'image d'entrée
+     * @param cheminDestination chemin de l'image de sortie
      */
     public void algorithmeKMeans(String cheminSource, String cheminDestination) {
         try {
-            // on charge l'image
+            // chargement de l'image source
             File fichierSource = new File(cheminSource);
             BufferedImage imageSource = ImageIO.read(fichierSource);
 
@@ -176,108 +259,98 @@ public class AlgoKMeans implements AlgoInterface {
                 return;
             }
 
-            // création d'une nv image vide avec les mêmes dimensions
             int largeur = imageSource.getWidth();
             int longeur = imageSource.getHeight();
-            BufferedImage nvImage = new BufferedImage(largeur, longeur, BufferedImage.TYPE_INT_ARGB);
 
-            int[] resultat = new int[nbGroupes];
-            int[][] tableauPixel = new int[largeur*longeur][3];
+            // conversion de l'image en tableau de Pixels
+            // chaque pixel devient un objet Pixel(x, y, couleur)
+            Pixel[] tableauPixel = new Pixel[largeur * longeur];
             int index = 0;
-
             for (int x = 0; x < largeur; x++) {
                 for (int y = 0; y < longeur; y++) {
-                    // mettre l'index du pixel
-                    // mettre le rgb du pixel
-                    int numRgb = imageSource.getRGB(x, y);
-                    int[] rgb = OutilCouleur.getTabColor(numRgb);
-
-                    tableauPixel[index][0] = rgb[0];
-                    tableauPixel[index][1] = rgb[1];
-                    tableauPixel[index][2] = rgb[2];
-
-                    index++;
-                }
-            }
-            // on calcul avec l'algo de KMeans
-            resultat = algorithmeClustering(tableauPixel);
-
-            index = 0;
-
-            for (int x = 0; x < largeur; x++) {
-                for (int y = 0; y < longeur; y++) {
-
-                    int cluster = resultat[index];
-
-                    int r = (int) centroidesFinaux[cluster][0];
-                    int g = (int) centroidesFinaux[cluster][1];
-                    int b = (int) centroidesFinaux[cluster][2];
-
-                    int newRgb = OutilCouleur.getColor(r, g, b);
-                    nvImage.setRGB(x, y, newRgb);
-
+                    tableauPixel[index] = new Pixel(x, y, imageSource.getRGB(x, y));
                     index++;
                 }
             }
 
-            // détection des biomes
+            // exécution de K Means
+            System.out.println("Lancement du K-Means avec " + nbGroupes + " groupes...");
+            List<List<Pixel>> groupes = algorithmeClustering(tableauPixel)[0];
+
+            // création de l'image
+            BufferedImage nvImage = new BufferedImage(largeur, longeur, BufferedImage.TYPE_INT_ARGB);
+            for (int g = 0; g < groupes.size(); g++) {
+                // récup la couleur du centroide final
+                int r = Math.max(0, Math.min(255, (int) centroidesFinaux[g][0]));
+                int gg = Math.max(0, Math.min(255, (int) centroidesFinaux[g][1]));
+                int b = Math.max(0, Math.min(255, (int) centroidesFinaux[g][2]));
+                int newRgb = OutilCouleur.getColor(r, gg, b);
+
+                // applique cette couleur à tous les pixels du groupe
+                for (Pixel p : groupes.get(g)) {
+                    nvImage.setRGB(p.x, p.y, newRgb);
+                }
+            }
+
+            // fusion des doublons de biomes car plusieurs groupes K-means peuvent correspondre au même biome
             Palette palette = new Palette();
-            NormeCouleurs norme = new NormeRGB();
-            String[] nomsBiomes = new String[nbGroupes];
+            Map<String, List<Pixel>> pixelsParBiomeUnique = new HashMap<>();
 
             for (int i = 0; i < nbGroupes; i++) {
-                // on recrée une couleur à partir du centroïde final
-                int r = (int) centroidesFinaux[i][0];
-                int g = (int) centroidesFinaux[i][1];
-                int b = (int) centroidesFinaux[i][2];
+                // couleur du centroïde du groupe i
+                int r = Math.max(0, Math.min(255, (int) centroidesFinaux[i][0]));
+                int g = Math.max(0, Math.min(255, (int) centroidesFinaux[i][1]));
+                int b = Math.max(0, Math.min(255, (int) centroidesFinaux[i][2]));
                 Color couleurCentroide = new Color(r, g, b);
 
-                // on demande recupère le biome le plus proche
-                nomsBiomes[i] = palette.trouverBiomeLePlusProche(couleurCentroide, norme);
+                // on utilise la norme demandée pour trouver le biome
+                String nomBiome = palette.trouverBiomeLePlusProche(couleurCentroide, norme);
 
-                System.out.println("Le groupe " + i + " correspond au biome : " + nomsBiomes[i]);
+                // on crée la liste du biome si elle n'existe pas encore
+                pixelsParBiomeUnique.putIfAbsent(nomBiome, new ArrayList<>());
+
+                // on ajoute les pixels de ce groupe dans la liste du biome concerné
+                pixelsParBiomeUnique.get(nomBiome).addAll(groupes.get(i));
+
+                System.out.println("Le groupe " + i + " est fusionné dans le biome : " + nomBiome);
             }
 
-            // affichage des différents biomes
+            // génération du fond éclairci
             double pourcentageEclair = 75.0;
-            for (int i = 0; i < nbGroupes; i++) {
-                // nouvelle image vierge
+            BufferedImage imageEclaircie = new BufferedImage(largeur, longeur, BufferedImage.TYPE_INT_ARGB);
+            for (int x = 0; x < largeur; x++) {
+                for (int y = 0; y < longeur; y++) {
+                    int numRgbBase = imageSource.getRGB(x, y);
+                    imageEclaircie.setRGB(x, y, OutilCouleur.eclaircirPixel(numRgbBase, pourcentageEclair));
+                }
+            }
+
+            // génération d'une seule image par biome complet
+            for (String nomBiome : pixelsParBiomeUnique.keySet()) {
+                // image du biome
                 BufferedImage imageBiome = new BufferedImage(largeur, longeur, BufferedImage.TYPE_INT_ARGB);
+                imageBiome.getGraphics().drawImage(imageEclaircie, 0, 0, null);
 
-                int indexPixel = 0;
-
-                for (int x = 0; x < largeur; x++) {
-                    for (int y = 0; y < longeur; y++) {
-                        // recup la couleur du pixel de l'image source
-                        int numRgbBase = imageSource.getRGB(x, y);
-
-                        // si le pixel appartient au groupe
-                        if (resultat[indexPixel] == i) {
-                            // on garde la couleur d'origine pour voir le biome
-                            imageBiome.setRGB(x, y, numRgbBase);
-                        } else {
-                            // on éclaircit le pixel
-                            int rgbEclairci = OutilCouleur.eclaircirPixel(numRgbBase, pourcentageEclair);
-                            imageBiome.setRGB(x, y, rgbEclairci);
-                        }
-                        indexPixel++;
-                    }
+                List<Pixel> pixelsDuBiome = pixelsParBiomeUnique.get(nomBiome);
+                for (Pixel p : pixelsDuBiome) {
+                    imageBiome.setRGB(p.x, p.y, imageSource.getRGB(p.x, p.y));
                 }
 
-                // sauvegarde le résultat
-                String nomFichier = cheminDestination.replace(".jpg", "_" + nomsBiomes[i] + ".jpg");
+                // nom du fichier de sortie
+                String nomFichier = cheminDestination.replace(".jpg", "_" + nomBiome + ".jpg");
                 File fichierDestBiome = new File(nomFichier);
                 ImageIO.write(imageBiome, "png", fichierDestBiome);
 
-                System.out.println("Image du biome " + nomsBiomes[i] + " sauvegardée : " + nomFichier);
-
+                System.out.println("Image du biome complet " + nomBiome + " sauvegardée : " + nomFichier);
             }
+
+            // sauvegarde  de l'image
             File fichierDest = new File(cheminDestination);
             ImageIO.write(nvImage, "png", fichierDest);
-            System.out.println(" Algo terminée");
+            System.out.println("Algo terminé !");
 
         } catch (IOException e) {
-            System.err.println("Erreur lors de la copie : " + e.getMessage());
+            System.err.println("Erreur : " + e.getMessage());
         }
     }
 }
