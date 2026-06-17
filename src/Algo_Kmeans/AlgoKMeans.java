@@ -1,8 +1,14 @@
 package Algo_Kmeans;
 
+import Normes.NormeCouleurs;
+import Normes.NormeRGB;
+import outils.OutilCouleur;
 import outils.OutilCouleur;
 import outils.AlgoInterface;
+import outils.Palette;
+
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -214,7 +220,58 @@ public class AlgoKMeans implements AlgoInterface {
                 }
             }
 
-            // sauvegarde le résultat
+            // détection des biomes
+            Palette palette = new Palette();
+            NormeCouleurs norme = new NormeRGB();
+            String[] nomsBiomes = new String[nbGroupes];
+
+            for (int i = 0; i < nbGroupes; i++) {
+                // on recrée une couleur à partir du centroïde final
+                int r = (int) centroidesFinaux[i][0];
+                int g = (int) centroidesFinaux[i][1];
+                int b = (int) centroidesFinaux[i][2];
+                Color couleurCentroide = new Color(r, g, b);
+
+                // on demande recupère le biome le plus proche
+                nomsBiomes[i] = palette.trouverBiomeLePlusProche(couleurCentroide, norme);
+
+                System.out.println("Le groupe " + i + " correspond au biome : " + nomsBiomes[i]);
+            }
+
+            // affichage des différents biomes
+            double pourcentageEclair = 75.0;
+            for (int i = 0; i < nbGroupes; i++) {
+                // nouvelle image vierge
+                BufferedImage imageBiome = new BufferedImage(largeur, longeur, BufferedImage.TYPE_INT_ARGB);
+
+                int indexPixel = 0;
+
+                for (int x = 0; x < largeur; x++) {
+                    for (int y = 0; y < longeur; y++) {
+                        // recup la couleur du pixel de l'image source
+                        int numRgbBase = imageSource.getRGB(x, y);
+
+                        // si le pixel appartient au groupe
+                        if (resultat[indexPixel] == i) {
+                            // on garde la couleur d'origine pour voir le biome
+                            imageBiome.setRGB(x, y, numRgbBase);
+                        } else {
+                            // on éclaircit le pixel
+                            int rgbEclairci = OutilCouleur.eclaircirPixel(numRgbBase, pourcentageEclair);
+                            imageBiome.setRGB(x, y, rgbEclairci);
+                        }
+                        indexPixel++;
+                    }
+                }
+
+                // sauvegarde le résultat
+                String nomFichier = cheminDestination.replace(".jpg", "_" + nomsBiomes[i] + ".jpg");
+                File fichierDestBiome = new File(nomFichier);
+                ImageIO.write(imageBiome, "png", fichierDestBiome);
+
+                System.out.println("Image du biome " + nomsBiomes[i] + " sauvegardée : " + nomFichier);
+
+            }
             File fichierDest = new File(cheminDestination);
             ImageIO.write(nvImage, "png", fichierDest);
             System.out.println(" Algo terminée");

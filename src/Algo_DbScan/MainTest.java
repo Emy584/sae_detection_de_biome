@@ -15,7 +15,7 @@ public class MainTest {
     public static void main (String[] args) {
         BufferedImage image;
         try {
-            image = ImageIO.read(new File("./img/fleur100*100.png"));
+            image = ImageIO.read(new File("./img/Planete1(100*100).jpg"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -25,8 +25,8 @@ public class MainTest {
                 pts.add(image.getRGB(x, y));
             }
         }
-        Copieur.optimiserParam(image, pts);
-        Copieur.copierImage(image, 100, 1, pts);
+        //Copieur.optimiserParam(image, pts);
+        Copieur.copierImage(image, 35, 1, pts);
     }
 
 }

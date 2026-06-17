@@ -1,5 +1,7 @@
 package Algo_DbScan;
 
+import outils.OutilCouleur;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,7 +17,8 @@ public class AlgoDbScan {
     }
 
 
-    public void DBSCAN(HashSet<Integer> x, double eps, int minPts) {
+    public ArrayList<Integer> DBSCAN(HashSet<Integer> x, double eps, int minPts) {
+        ArrayList<Integer> bruits = new ArrayList<>() ;
         this.x = x;
         for (int xn : x) {
             System.out.println("Nouveau Point");
@@ -28,8 +31,11 @@ public class AlgoDbScan {
                 ArrayList<Integer> cluster = new ArrayList<>();
                 clusters.add(cluster);
                 expandCluster(xn, vn, cluster, eps, minPts);
+            } else {
+                bruits.add(xn);
             }
         }
+        return bruits ;
     }
 
     public void expandCluster(int xn, ArrayList<Integer> vn, ArrayList<Integer> cluster, double eps, int minPts) {
