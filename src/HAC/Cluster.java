@@ -145,8 +145,8 @@ public class Cluster {
             sommeyD += coordonnees[idPointD][1];
         }
         // moyenne
-        double centrexD = sommexD / this.points.size();
-        double centreyD = sommeyD / this.points.size();
+        double centrexD = sommexD / autre.getPoints().size();
+        double centreyD = sommeyD / autre.getPoints().size();
 
         // calcul de la distance
 
