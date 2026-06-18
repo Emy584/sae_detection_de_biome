@@ -1,5 +1,6 @@
 ### IntelliJ IDEA ###
 .idea
+.iml
 sae_detection_de_biome.iml
 out/
 src/flou/*.class
