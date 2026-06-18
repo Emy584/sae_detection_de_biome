@@ -35,5 +35,7 @@ algo.algorithmeKMeans("./img/imageGauss.png", "./img/Planete1AlgoKMeans.jpg");
 Dans le src/Algo_DbSca,/Main.java :
 On va java Main.java
 
+PS : Selon l'IDE, changer le chemin pour chercher l'image et la sauvegarder 
+
 On va choisir le nombre de groupes à traiter puis le biome sur lesquel on applique DbScan. 
 L'image est générée dans img/result.
