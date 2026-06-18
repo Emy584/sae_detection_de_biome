@@ -23,7 +23,7 @@ public class Main {
     public static void main(String[] args) {
 
         try {
-            BufferedImage image = ImageIO.read(new File("../../img/Planete1(200&200).jpg"));
+            BufferedImage image = ImageIO.read(new File("./img/Planete1(200&200).jpg"));
 
             ArrayList<Pixel> pts = new ArrayList<>();
             for (int x = 0; x < image.getWidth(); x++) {
@@ -99,7 +99,7 @@ public class Main {
 
             System.out.println("AffichageReste");
             // Pour tous les autres pixels
-            ImageIO.write(image2, "png", new File("../../img/result/dbscan_result.png"));
+            ImageIO.write(image2, "png", new File("./img/result/dbscan_result.png"));
             System.out.println("Traitement terminé.");
 
 
